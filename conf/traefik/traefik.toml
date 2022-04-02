@@ -1,0 +1,25 @@
+[log]
+level = "INFO"
+
+[providers.docker]
+endpoint = "tcp://dockerproxy:2375"
+exposedByDefault = false
+network = "traefik"
+
+[api]
+dashboard = true
+debug = true
+
+[entryPoints]
+[entryPoints.web]
+address = ":80"
+[entryPoints.web-secure]
+address = ":443"
+[entryPoints.dashboard]
+address = ":8080"
+
+[certificatesResolvers]
+[certificatesResolvers.default.acme]
+email = "contact@chriswiegman.com"
+storage = "acme.json"
+[certificatesResolvers.default.acme.tlsChallenge]

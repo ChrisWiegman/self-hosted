@@ -1,0 +1,87 @@
+version: "3"
+
+networks:
+  default:
+    driver: bridge
+  traefik:
+    internal: true
+
+services:
+  watchtower:
+    command: --label-enable --cleanup --interval 300
+    image: containrrr/watchtower
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    network_mode: none
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  dockerproxy:
+    depends_on:
+      - watchtower
+    environment:
+      CONTAINERS: 1
+    image: tecnativa/docker-socket-proxy
+    networks:
+      - traefik
+    ports:
+      - 2375
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+  traefik:
+    depends_on:
+      - dockerproxy
+      - watchtower
+    image: traefik:2.6
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+      - traefik
+    ports:
+      - 80:80
+      - 443:443
+      - 8080:8080
+    restart: always
+    volumes:
+      - ./conf/traefik/acme.json:/acme.json
+      - ./conf/traefik/traefik.toml:/traefik.toml
+
+  mariadb:
+    depends_on:
+      - watchtower
+    env_file: .mariadb.env
+    image: mariadb:10
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    ports:
+      - 3306:3306
+    restart: always
+    volumes:
+      - ./data/volumes/mariadb:/var/lib/mysql
+
+  freshrss:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+    env_file: .freshrss.env
+    image: freshrss/freshrss
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.freshrss-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.freshrss-http.entrypoints=web"
+      - "traefik.http.routers.freshrss-http.rule=Host(`freshrss.wieg.co`)"
+      - "traefik.http.routers.freshrss-http.middlewares=freshrss-https@docker"
+      - "traefik.http.routers.freshrss.entrypoints=web-secure"
+      - "traefik.http.routers.freshrss.rule=Host(`freshrss.wieg.co`)"
+      - "traefik.http.routers.freshrss.tls=true"
+      - "traefik.http.routers.freshrss.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
