@@ -64,6 +64,18 @@ services:
     volumes:
       - ./data/volumes/mariadb:/var/lib/mysql
 
+  redis:
+    depends_on:
+      - watchtower
+    image: redis:6
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/volumes/redis:/data
+
   freshrss:
     depends_on:
       - mariadb
@@ -81,6 +93,29 @@ services:
       - "traefik.http.routers.freshrss.rule=Host(`freshrss.wieg.co`)"
       - "traefik.http.routers.freshrss.tls=true"
       - "traefik.http.routers.freshrss.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+
+  wallabag:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+      - redis
+    env_file: .wallabag.env
+    image: freshrss/freshrss
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.wallabag-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.wallabag-http.entrypoints=web"
+      - "traefik.http.routers.wallabag-http.rule=Host(`wallabag.wieg.co`)"
+      - "traefik.http.routers.wallabag-http.middlewares=wallabag-https@docker"
+      - "traefik.http.routers.wallabag.entrypoints=web-secure"
+      - "traefik.http.routers.wallabag.rule=Host(`wallabag.wieg.co`)"
+      - "traefik.http.routers.wallabag.tls=true"
+      - "traefik.http.routers.wallabag.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - default
