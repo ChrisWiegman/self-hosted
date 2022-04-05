@@ -105,7 +105,7 @@ services:
       - watchtower
       - redis
     env_file: .wallabag.env
-    image: freshrss/freshrss
+    image: wallabag/wallabag
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.wallabag-https.redirectscheme.scheme=https"
@@ -120,3 +120,6 @@ services:
     networks:
       - default
     restart: always
+    volumnes:
+      - ./data/wallabag/data:/var/www/wallabag/data
+      - ./data/wallabag/images:/var/www/wallabag/web/assets/images
