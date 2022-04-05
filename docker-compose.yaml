@@ -120,6 +120,28 @@ services:
     networks:
       - default
     restart: always
-    volumnes:
+    volumes:
       - ./data/wallabag/data:/var/www/wallabag/data
       - ./data/wallabag/images:/var/www/wallabag/web/assets/images
+
+  rssbridge:
+    depends_on:
+      - traefik
+      - watchtower
+    image: rssbridge/rss-bridge:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.rssbridge-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.rssbridge-http.entrypoints=web"
+      - "traefik.http.routers.rssbridge-http.rule=Host(`rssbridge.wieg.co`)"
+      - "traefik.http.routers.rssbridge-http.middlewares=rssbridge-https@docker"
+      - "traefik.http.routers.rssbridge.entrypoints=web-secure"
+      - "traefik.http.routers.rssbridge.rule=Host(`rssbridge.wieg.co`)"
+      - "traefik.http.routers.rssbridge.tls=true"
+      - "traefik.http.routers.rssbridge.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./conf/rssbridge:/config
