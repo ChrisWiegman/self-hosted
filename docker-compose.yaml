@@ -34,7 +34,7 @@ services:
     depends_on:
       - dockerproxy
       - watchtower
-    image: traefik:2.6
+    image: traefik:2.7
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -67,7 +67,7 @@ services:
   redis:
     depends_on:
       - watchtower
-    image: redis:6
+    image: redis:7
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -123,6 +123,31 @@ services:
     volumes:
       - ./data/wallabag/data:/var/www/wallabag/data
       - ./data/wallabag/images:/var/www/wallabag/web/assets/images
+
+  nextcloud:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+      - redis
+    env_file: .nextcloud.env
+    image: nextcloud
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.nextcloud-http.entrypoints=web"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.wieg.co`)"
+      - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
+      - "traefik.http.routers.nextcloud.entrypoints=web-secure"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.wieg.co`)"
+      - "traefik.http.routers.nextcloud.tls=true"
+      - "traefik.http.routers.nextcloud.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/nextcloud/data:/var/www/html
 
   rssbridge:
     depends_on:
