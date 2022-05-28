@@ -62,7 +62,7 @@ services:
       - 3306:3306
     restart: always
     volumes:
-      - ./data/volumes/mariadb:/var/lib/mysql
+      - ./data/mariadb:/var/lib/mysql
 
   redis:
     depends_on:
@@ -74,7 +74,7 @@ services:
       - default
     restart: always
     volumes:
-      - ./data/volumes/redis:/data
+      - ./data/redis:/data
 
   freshrss:
     depends_on:
