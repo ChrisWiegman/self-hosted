@@ -87,10 +87,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.freshrss-https.redirectscheme.scheme=https"
       - "traefik.http.routers.freshrss-http.entrypoints=web"
-      - "traefik.http.routers.freshrss-http.rule=Host(`freshrss.wieg.co`)"
+      - "traefik.http.routers.freshrss-http.rule=Host(`freshrss.sites.cfw.li`)"
       - "traefik.http.routers.freshrss-http.middlewares=freshrss-https@docker"
       - "traefik.http.routers.freshrss.entrypoints=web-secure"
-      - "traefik.http.routers.freshrss.rule=Host(`freshrss.wieg.co`)"
+      - "traefik.http.routers.freshrss.rule=Host(`freshrss.sites.cfw.li`)"
       - "traefik.http.routers.freshrss.tls=true"
       - "traefik.http.routers.freshrss.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
@@ -110,10 +110,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.wallabag-https.redirectscheme.scheme=https"
       - "traefik.http.routers.wallabag-http.entrypoints=web"
-      - "traefik.http.routers.wallabag-http.rule=Host(`wallabag.wieg.co`)"
+      - "traefik.http.routers.wallabag-http.rule=Host(`wallabag.sites.cfw.li`)"
       - "traefik.http.routers.wallabag-http.middlewares=wallabag-https@docker"
       - "traefik.http.routers.wallabag.entrypoints=web-secure"
-      - "traefik.http.routers.wallabag.rule=Host(`wallabag.wieg.co`)"
+      - "traefik.http.routers.wallabag.rule=Host(`wallabag.sites.cfw.li`)"
       - "traefik.http.routers.wallabag.tls=true"
       - "traefik.http.routers.wallabag.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
@@ -136,10 +136,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
-      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.wieg.co`)"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.sites.cfw.li`)"
       - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
       - "traefik.http.routers.nextcloud.entrypoints=web-secure"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.wieg.co`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.sites.cfw.li`)"
       - "traefik.http.routers.nextcloud.tls=true"
       - "traefik.http.routers.nextcloud.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
@@ -148,6 +148,31 @@ services:
     restart: always
     volumes:
       - ./data/nextcloud/data:/var/www/html
+
+  gitea:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+      - redis
+    env_file: .gitea.env
+    image: gitea/gitea:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.gitea-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.gitea-http.entrypoints=web"
+      - "traefik.http.routers.gitea-http.rule=Host(`gitea.sites.cfw.li`)"
+      - "traefik.http.routers.gitea-http.middlewares=gitea-https@docker"
+      - "traefik.http.routers.gitea.entrypoints=web-secure"
+      - "traefik.http.routers.gitea.rule=Host(`gitea.sites.cfw.li`)"
+      - "traefik.http.routers.gitea.tls=true"
+      - "traefik.http.routers.gitea.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/gitea:/data
 
   rssbridge:
     depends_on:
@@ -158,10 +183,10 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.rssbridge-https.redirectscheme.scheme=https"
       - "traefik.http.routers.rssbridge-http.entrypoints=web"
-      - "traefik.http.routers.rssbridge-http.rule=Host(`rssbridge.wieg.co`)"
+      - "traefik.http.routers.rssbridge-http.rule=Host(`rssbridge.sites.cfw.li`)"
       - "traefik.http.routers.rssbridge-http.middlewares=rssbridge-https@docker"
       - "traefik.http.routers.rssbridge.entrypoints=web-secure"
-      - "traefik.http.routers.rssbridge.rule=Host(`rssbridge.wieg.co`)"
+      - "traefik.http.routers.rssbridge.rule=Host(`rssbridge.sites.cfw.li`)"
       - "traefik.http.routers.rssbridge.tls=true"
       - "traefik.http.routers.rssbridge.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
