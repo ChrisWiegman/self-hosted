@@ -65,8 +65,13 @@ services:
       - ./data/mariadb:/var/lib/mysql
 
   redis:
+    command:
+      - /bin/sh
+      - -c
+      - redis-server --requirepass "$${REDIS_PASSWORD:?REDIS_PASSWORD variable is not set}"
     depends_on:
       - watchtower
+    env_file: .redis.env
     image: redis:7
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
