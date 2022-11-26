@@ -34,7 +34,7 @@ services:
     depends_on:
       - dockerproxy
       - watchtower
-    image: traefik:2.9
+    image: traefik:2
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -53,7 +53,7 @@ services:
     depends_on:
       - watchtower
     env_file: .mariadb.env
-    image: mariadb:10
+    image: mariadb:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -72,7 +72,7 @@ services:
     depends_on:
       - watchtower
     env_file: .redis.env
-    image: redis:7
+    image: redis:latest
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -87,7 +87,7 @@ services:
       - traefik
       - watchtower
     env_file: .freshrss.env
-    image: freshrss/freshrss
+    image: freshrss/freshrss:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.freshrss-https.redirectscheme.scheme=https"
@@ -110,7 +110,7 @@ services:
       - watchtower
       - redis
     env_file: .wallabag.env
-    image: wallabag/wallabag
+    image: wallabag/wallabag:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.wallabag-https.redirectscheme.scheme=https"
@@ -136,7 +136,7 @@ services:
       - watchtower
       - redis
     env_file: .nextcloud.env
-    image: nextcloud
+    image: nextcloud:latest
     labels:
       - "traefik.enable=true"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
