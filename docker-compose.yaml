@@ -34,7 +34,7 @@ services:
     depends_on:
       - dockerproxy
       - watchtower
-    image: traefik:2
+    image: traefik:2.9
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
