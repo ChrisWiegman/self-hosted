@@ -183,3 +183,27 @@ services:
     restart: always
     volumes:
       - ./data/gitea:/data
+
+  vaultwarden:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+    env_file: .vaultwarden.env
+    image: vaultwarden/server:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.vaultwarden-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.vaultwarden-http.entrypoints=web"
+      - "traefik.http.routers.vaultwarden-http.rule=Host(`vaultwarden.sites.cfw.li`)"
+      - "traefik.http.routers.vaultwarden-http.middlewares=vaultwarden-https@docker"
+      - "traefik.http.routers.vaultwarden.entrypoints=web-secure"
+      - "traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.sites.cfw.li`)"
+      - "traefik.http.routers.vaultwarden.tls=true"
+      - "traefik.http.routers.vaultwarden.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/vaultwarden:/data
