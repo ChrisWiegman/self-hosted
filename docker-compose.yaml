@@ -139,6 +139,14 @@ services:
     image: nextcloud:latest
     labels:
       - "traefik.enable=true"
+      - "traefik.http.middlewares.nextcloudredir.redirectregex.permanent=true"
+      - "traefik.http.middlewares.nextcloudredir.redirectregex.regex=https://(.*)/.well-known/(card|cal)dav"
+      - "traefik.http.middlewares.nextcloudredir.redirectregex.replacement=https://$$1/remote.php/dav/"
+      - "traefik.http.middlewares.nextcloudsts.headers.stsincludesubdomains=false"
+      - "traefik.http.middlewares.nextcloudsts.headers.stspreload=true"
+      - "traefik.http.middlewares.nextcloudsts.headers.stsseconds=31536000"
+      - "traefik.http.middlewares.nextcloudsts.headers.isdevelopment=false"
+      - "traefik.http.routers.nextcloud.middlewares=nextcloudredir,nextcloudsts"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
       - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.sites.kana.li`)"
