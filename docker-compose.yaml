@@ -241,3 +241,29 @@ services:
       - ./data/photoprism/originals:/photoprism/originals
       - ./data/photoprism/storage:/photoprism/storage
       - ./data/photoprism/import:/photoprism/import
+
+  lychee:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+    env_file: .lychee.env
+    image: lycheeorg/lychee:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.lychee-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.lychee-http.entrypoints=web"
+      - "traefik.http.routers.lychee-http.rule=Host(`lychee.sites.kana.li`)"
+      - "traefik.http.routers.lychee-http.middlewares=lychee-https@docker"
+      - "traefik.http.routers.lychee.entrypoints=web-secure"
+      - "traefik.http.routers.lychee.rule=Host(`lychee.sites.kana.li`)"
+      - "traefik.http.routers.lychee.tls=true"
+      - "traefik.http.routers.lychee.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/lychee/conf:/conf
+      - ./data/lychee/uploads:/uploads
+      - ./data/lychee/sym:/sym
