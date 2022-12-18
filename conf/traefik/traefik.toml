@@ -4,7 +4,7 @@ level = "INFO"
 [providers.docker]
 endpoint = "tcp://dockerproxy:2375"
 exposedByDefault = false
-network = "traefik"
+network = "self-hosted_default"
 
 [api]
 dashboard = true
