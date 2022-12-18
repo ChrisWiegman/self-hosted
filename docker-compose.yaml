@@ -215,3 +215,29 @@ services:
     restart: always
     volumes:
       - ./data/vaultwarden:/data
+
+  photoprism:
+    depends_on:
+      - mariadb
+      - traefik
+      - watchtower
+    env_file: .photoprism.env
+    image: photoprism/photoprism:latest
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.middlewares.photoprism-https.redirectscheme.scheme=https"
+      - "traefik.http.routers.photoprism-http.entrypoints=web"
+      - "traefik.http.routers.photoprism-http.rule=Host(`photoprism.sites.kana.li`)"
+      - "traefik.http.routers.photoprism-http.middlewares=photoprism-https@docker"
+      - "traefik.http.routers.photoprism.entrypoints=web-secure"
+      - "traefik.http.routers.photoprism.rule=Host(`photoprism.sites.kana.li`)"
+      - "traefik.http.routers.photoprism.tls=true"
+      - "traefik.http.routers.photoprism.tls.certresolver=default"
+      - "com.centurylinklabs.watchtower.enable=true"
+    networks:
+      - default
+    restart: always
+    volumes:
+      - ./data/photoprism/originals:/photoprism/originals
+      - ./data/photoprism/storage:/photoprism/storage
+      - ./data/photoprism/import:/photoprism/import
