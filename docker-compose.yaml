@@ -102,6 +102,9 @@ services:
     networks:
       - default
     restart: always
+    volumes:
+      - ./data/freshrss/data:/var/www/FreshRSS/data
+      - ./data/freshrss/extensions:/var/www/FreshRSS/extensions
 
   wallabag:
     depends_on:
