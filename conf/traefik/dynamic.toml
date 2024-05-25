@@ -1,0 +1,27 @@
+[tls.options]
+
+[tls.options.default]
+minVersion = "VersionTLS12"
+sniStrict = true
+
+[[tls.certificates]]
+certFile = "/var/certs/kana.site.pem"
+keyFile = "/var/certs/kana.site.key"
+
+[http]
+
+[http.middlewares]
+[http.middlewares.my-fail2ban]
+[http.middlewares.my-fail2ban.plugin]
+[http.middlewares.my-fail2ban.plugin.fail2ban]
+[http.middlewares.my-fail2ban.plugin.fail2ban.blacklist]
+ip = "192.168.0.0/24"
+
+[http.middlewares.my-fail2ban.plugin.fail2ban.rules]
+bantime = "3h"
+enabled = "true"
+findtime = "10m"
+maxretry = "4"
+
+[http.middlewares.my-fail2ban.plugin.fail2ban.whitelist]
+ip = "::1,127.0.0.1"

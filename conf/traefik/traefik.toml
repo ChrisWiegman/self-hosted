@@ -1,27 +1,26 @@
 [log]
 level = "INFO"
 
+[providers]
 [providers.docker]
 endpoint = "tcp://dockerproxy:2375"
 exposedByDefault = false
 network = "self-hosted_default"
+[providers.file]
+filename = "/etc/traefik/dynamic.toml"
 
 [api]
 dashboard = true
 debug = true
+insecure = true
 
 [entryPoints]
 [entryPoints.web]
 address = ":80"
+
 [entryPoints.web-secure]
 address = ":443"
-[entryPoints.dashboard]
-address = ":8080"
-[entryPoints.ssh]
-address = ":2222"
 
-[certificatesResolvers]
-[certificatesResolvers.default.acme]
-email = "contact@chriswiegman.com"
-storage = "acme.json"
-[certificatesResolvers.default.acme.tlsChallenge]
+[experimental.plugins.fail2ban]
+moduleName = "github.com/tomMoulard/fail2ban"
+version = "v0.7.1"

@@ -1,5 +1,3 @@
-version: "3"
-
 networks:
   default:
     driver: bridge
@@ -34,7 +32,7 @@ services:
     depends_on:
       - dockerproxy
       - watchtower
-    image: traefik:2.9
+    image: traefik:3.0
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
@@ -46,8 +44,10 @@ services:
       - 8080:8080
     restart: always
     volumes:
-      - ./conf/traefik/acme.json:/acme.json
-      - ./conf/traefik/traefik.toml:/traefik.toml
+      - ./conf/traefik/acme.json:/etc/traefik/acme.json
+      - ./conf/traefik/traefik.toml:/etc/traefik/traefik.toml
+      - ./conf/traefik/dynamic.toml:/etc/traefik/dynamic.toml
+      - /Users/chriswiegman/.config/kana/certs:/var/certs
 
   mariadb:
     depends_on:
@@ -92,12 +92,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.freshrss-https.redirectscheme.scheme=https"
       - "traefik.http.routers.freshrss-http.entrypoints=web"
-      - "traefik.http.routers.freshrss-http.rule=Host(`freshrss.sites.kana.li`)"
+      - "traefik.http.routers.freshrss-http.rule=Host(`freshrss.sites.kana.sh`)"
       - "traefik.http.routers.freshrss-http.middlewares=freshrss-https@docker"
       - "traefik.http.routers.freshrss.entrypoints=web-secure"
-      - "traefik.http.routers.freshrss.rule=Host(`freshrss.sites.kana.li`)"
+      - "traefik.http.routers.freshrss.rule=Host(`freshrss.sites.kana.sh`)"
       - "traefik.http.routers.freshrss.tls=true"
-      - "traefik.http.routers.freshrss.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - default
@@ -118,12 +117,11 @@ services:
       - "traefik.enable=true"
       - "traefik.http.middlewares.wallabag-https.redirectscheme.scheme=https"
       - "traefik.http.routers.wallabag-http.entrypoints=web"
-      - "traefik.http.routers.wallabag-http.rule=Host(`wallabag.sites.kana.li`)"
+      - "traefik.http.routers.wallabag-http.rule=Host(`wallabag.sites.kana.sh`)"
       - "traefik.http.routers.wallabag-http.middlewares=wallabag-https@docker"
       - "traefik.http.routers.wallabag.entrypoints=web-secure"
-      - "traefik.http.routers.wallabag.rule=Host(`wallabag.sites.kana.li`)"
+      - "traefik.http.routers.wallabag.rule=Host(`wallabag.sites.kana.sh`)"
       - "traefik.http.routers.wallabag.tls=true"
-      - "traefik.http.routers.wallabag.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - default
@@ -152,121 +150,14 @@ services:
       - "traefik.http.routers.nextcloud.middlewares=nextcloudredir,nextcloudsts"
       - "traefik.http.middlewares.nextcloud-https.redirectscheme.scheme=https"
       - "traefik.http.routers.nextcloud-http.entrypoints=web"
-      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.sites.kana.li`)"
+      - "traefik.http.routers.nextcloud-http.rule=Host(`nextcloud.sites.kana.sh`)"
       - "traefik.http.routers.nextcloud-http.middlewares=nextcloud-https@docker"
       - "traefik.http.routers.nextcloud.entrypoints=web-secure"
-      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.sites.kana.li`)"
+      - "traefik.http.routers.nextcloud.rule=Host(`nextcloud.sites.kana.sh`)"
       - "traefik.http.routers.nextcloud.tls=true"
-      - "traefik.http.routers.nextcloud.tls.certresolver=default"
       - "com.centurylinklabs.watchtower.enable=true"
     networks:
       - default
     restart: always
     volumes:
       - ./data/nextcloud/data:/var/www/html
-
-  gitea:
-    depends_on:
-      - mariadb
-      - traefik
-      - watchtower
-      - redis
-    env_file: .gitea.env
-    image: gitea/gitea:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.gitea-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.gitea-http.entrypoints=web"
-      - "traefik.http.routers.gitea-http.rule=Host(`gitea.sites.kana.li`)"
-      - "traefik.http.routers.gitea-http.middlewares=gitea-https@docker"
-      - "traefik.http.routers.gitea.entrypoints=web-secure"
-      - "traefik.http.routers.gitea.rule=Host(`gitea.sites.kana.li`)"
-      - "traefik.http.routers.gitea.tls=true"
-      - "traefik.http.routers.gitea.tls.certresolver=default"
-      - "traefik.http.services.gitea-http-svc.loadbalancer.server.port=3000"
-      - "traefik.tcp.routers.gitea-ssh.rule=HostSNI(`*`)"
-      - "traefik.tcp.routers.gitea-ssh.entrypoints=ssh"
-      - "traefik.tcp.routers.gitea-ssh.service=gitea-ssh-svc"
-      - "traefik.tcp.services.gitea-ssh-svc.loadbalancer.server.port=22"
-      - "com.centurylinklabs.watchtower.enable=true"
-    networks:
-      - default
-    restart: always
-    volumes:
-      - ./data/gitea:/data
-
-  vaultwarden:
-    depends_on:
-      - mariadb
-      - traefik
-      - watchtower
-    env_file: .vaultwarden.env
-    image: vaultwarden/server:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.vaultwarden-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.vaultwarden-http.entrypoints=web"
-      - "traefik.http.routers.vaultwarden-http.rule=Host(`vaultwarden.sites.kana.li`)"
-      - "traefik.http.routers.vaultwarden-http.middlewares=vaultwarden-https@docker"
-      - "traefik.http.routers.vaultwarden.entrypoints=web-secure"
-      - "traefik.http.routers.vaultwarden.rule=Host(`vaultwarden.sites.kana.li`)"
-      - "traefik.http.routers.vaultwarden.tls=true"
-      - "traefik.http.routers.vaultwarden.tls.certresolver=default"
-      - "com.centurylinklabs.watchtower.enable=true"
-    networks:
-      - default
-    restart: always
-    volumes:
-      - ./data/vaultwarden:/data
-
-  photoprism:
-    depends_on:
-      - mariadb
-      - traefik
-      - watchtower
-    env_file: .photoprism.env
-    image: photoprism/photoprism:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.photoprism-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.photoprism-http.entrypoints=web"
-      - "traefik.http.routers.photoprism-http.rule=Host(`photoprism.sites.kana.li`)"
-      - "traefik.http.routers.photoprism-http.middlewares=photoprism-https@docker"
-      - "traefik.http.routers.photoprism.entrypoints=web-secure"
-      - "traefik.http.routers.photoprism.rule=Host(`photoprism.sites.kana.li`)"
-      - "traefik.http.routers.photoprism.tls=true"
-      - "traefik.http.routers.photoprism.tls.certresolver=default"
-      - "com.centurylinklabs.watchtower.enable=true"
-    networks:
-      - default
-    restart: always
-    volumes:
-      - ./data/photoprism/originals:/photoprism/originals
-      - ./data/photoprism/storage:/photoprism/storage
-      - ./data/photoprism/import:/photoprism/import
-
-  lychee:
-    depends_on:
-      - mariadb
-      - traefik
-      - watchtower
-    env_file: .lychee.env
-    image: lycheeorg/lychee:latest
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.middlewares.lychee-https.redirectscheme.scheme=https"
-      - "traefik.http.routers.lychee-http.entrypoints=web"
-      - "traefik.http.routers.lychee-http.rule=Host(`lychee.sites.kana.li`)"
-      - "traefik.http.routers.lychee-http.middlewares=lychee-https@docker"
-      - "traefik.http.routers.lychee.entrypoints=web-secure"
-      - "traefik.http.routers.lychee.rule=Host(`lychee.sites.kana.li`)"
-      - "traefik.http.routers.lychee.tls=true"
-      - "traefik.http.routers.lychee.tls.certresolver=default"
-      - "com.centurylinklabs.watchtower.enable=true"
-    networks:
-      - default
-    restart: always
-    volumes:
-      - ./data/lychee/conf:/conf
-      - ./data/lychee/uploads:/uploads
-      - ./data/lychee/sym:/sym
