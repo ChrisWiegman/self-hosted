@@ -86,7 +86,9 @@ services:
       - mariadb
       - traefik
       - watchtower
-    env_file: .freshrss.env
+    environment:
+      - CRON_MIN=*/10
+      - TZ=America/New_York
     image: freshrss/freshrss:latest
     labels:
       - "traefik.enable=true"
